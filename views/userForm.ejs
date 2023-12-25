@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>user form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body class="bg-dark d-flex justify-content-center " >
+
+    <div class="col-4 d-flex justify-content-center text-center align-items-center bg-success rounded " style="margin-top: 3%;">
+
+        <form class="form col-6 " id="userForm" action="/user/save" method="post">
+
+            <h2 class="color-primary text-light" style="margin-top: 10%;">Enter your details</h2><br><br>
+
+            <input type="hidden" id="userId" name="id" value="<%= user ? user.id : '' %>">
+
+            <div class="mb-3">
+              <label class="form-label text-light" for="name">Name</label>
+              <input type="text" class="form-control" id="inputName" placeholder="Enter your name" name="name" value="<%= user ? user.name : '' %>">
+              <small id="nameError" class="text-dark d-none"><b>Please enter a valid name.</b></small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-light" for="age">Age</label>
+                <input type="number" class="form-control" id="inputAge" placeholder="Enter your age" name="age" value="<%= user ? user.age : '' %>">
+                <small id="ageError" class="text-dark  d-none"><b>Please enter a valid age.</b></small>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label text-light" for="email">Email address</label>
+              <input type="email" class="form-control" id="inputEmail" placeholder="Enter your email" name="email" value="<%= user ? user.email : '' %>">
+              <small id="emailError" class="text-dark  d-none"><b>Please enter a valid Email.</b></small>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label text-light " for="phone">Phone Number</label>
+                <input type="number" class="form-control" id="inputPhone" placeholder="Enter your phone number" name="phone" value="<%= user ? user.phone : '' %>"> 
+                <small id="phoneError" class="text-dark  d-none"><b>Please enter a valid phone Number.</b></small>   
+            </div>
+            
+            <button id="submitBtn" type="submit" class="btn btn-primary" style="margin-bottom: 10%;" value="Submit">Submit</button>
+
+        </form>
+
+    </div>    
+
+
+    <script>
+
+        function formValidation(name, age, email, phoneNumber) {
+            const nameRegex = /^[a-zA-Z\s-]+$/;
+            const ageRegex = /^[0-9]+$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const phoneRegex = /^\d{10}$/;
+
+            function isValidName(name) {
+                return nameRegex.test(name);
+            }
+
+            function isValidAge(age) {
+                return ageRegex.test(age);
+            }
+
+            function isValidEmail(email) {
+                return emailRegex.test(email);
+            }
+
+            function isValidPhoneNumber(phoneNumber) {
+                return phoneRegex.test(phoneNumber);
+            }
+
+            const isNameValid = isValidName(name);
+            const isAgeValid = isValidAge(age);
+            const isEmailValid = isValidEmail(email);
+            const isPhoneNumberValid = isValidPhoneNumber(phoneNumber);
+
+            return {
+                isNameValid,
+                isEmailValid,
+                isPhoneNumberValid,
+                isAgeValid,
+            };
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+
+            console.log('Submit button clicked');
+
+            const userId = document.getElementById('userId').value;
+            const name = document.getElementById('inputName').value;
+            const age = document.getElementById('inputAge').value;
+            const email = document.getElementById('inputEmail').value;
+            const phone = document.getElementById('inputPhone').value;
+
+            const validation = formValidation(name, age, email, phone);
+
+            document.getElementById('nameError').classList.add('d-none');
+            document.getElementById('ageError').classList.add('d-none');
+            document.getElementById('emailError').classList.add('d-none');
+            document.getElementById('phoneError').classList.add('d-none');
+
+            if (!validation.isNameValid) {
+                document.getElementById('nameError').classList.remove('d-none');
+            }
+
+            if (!validation.isAgeValid) {
+                document.getElementById('ageError').classList.remove('d-none');
+            }
+
+            if (!validation.isEmailValid) {
+                document.getElementById('emailError').classList.remove('d-none');
+            }
+
+            if (!validation.isPhoneNumberValid) {
+                document.getElementById('phoneError').classList.remove('d-none');
+            }
+
+            if (!validation.isNameValid || !validation.isAgeValid || !validation.isEmailValid || !validation.isPhoneNumberValid) {
+                console.error('Form validation failed.');
+                return; // Prevent form submission if validation fails
+            }
+
+            const formData = new URLSearchParams(); // Use form-urlencoded data
+            formData.append('id', userId);
+            formData.append('name', name);
+            formData.append('age', age);
+            formData.append('email', email);
+            formData.append('phone', phone);
+
+            fetch('/user/save', {
+                method: 'POST',
+                body: formData, // Send form-urlencoded data
+            })
+            .then((response) => {
+                if (response.ok) {
+                    console.log('Data sent to server');
+                    window.location.href = '/'; 
+                } else {
+                    console.error('Error sending data to server');
+                }
+            })
+            .catch((error) => {
+                console.error('Error', error);
+            });
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', submitForm);
+
+    </script>
+    
+   
+    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
